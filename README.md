@@ -5,7 +5,7 @@ This project is a Python-based web scraper designed to extract event information
 ## Project Structure
 
 ```
-event-info-scraper
+scrape-right
 ├── src
 │   ├── __init__.py
 │   ├── main.py
@@ -25,7 +25,7 @@ event-info-scraper
 1. Clone the repository:
    ```
    git clone <repository-url>
-   cd event-info-scraper
+   cd scrape-right
    ```
 
 2. Install the required dependencies:

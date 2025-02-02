@@ -1,5 +1,3 @@
-from selenium import webdriver
-
 BASE_URL = 'https://www.vlr.gg/'
 EVENTS_BASE_URL = BASE_URL + 'events/'
 

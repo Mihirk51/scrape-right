@@ -1,8 +1,10 @@
+import json
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 from config.settings import BASE_URL, REGIONS
+
 
 service = Service(executable_path='chromedriver.exe')
 events_base_url = f"{BASE_URL}events/"
@@ -10,6 +12,7 @@ region_mapping_links = {
     key: f"{events_base_url}{value}"
     for key, value in REGIONS.items()
 }
+
 
 class EventScraper:
     def __init__(self, region):
@@ -65,5 +68,8 @@ class EventScraper:
             time.sleep(1)
             events.extend(self.get_all_events())
         self.driver.quit()
+
+        with open('events.json', 'w') as json_file:
+            json.dump(events, json_file, indent=4)
 
         return events
