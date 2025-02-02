@@ -1,8 +1,0 @@
-Metadata-Version: 2.2
-Name: scrape-right
-Version: 0.1
-Requires-Dist: selenium
-Requires-Dist: webdriver-manager
-Requires-Dist: beautifulsoup4
-Requires-Dist: requests
-Dynamic: requires-dist
