@@ -1,12 +1,13 @@
 import argparse
 from scraper.events_scraper import EventScraper
 from config.settings import REGION_MAPPING_LINKS
+from logger import logger  # Import the logger
 
 
 def get_events_info(region_code):
     region = REGION_MAPPING_LINKS.get(region_code)
     if not region:
-        print(f"Invalid region code: {region_code}")
+        logger.error(f"Invalid region code: {region_code}")
         return
 
     scraper = EventScraper(region)
@@ -23,6 +24,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == 'get_events_info':
+        logger.info(f"Fetching events info for region: {args.region}")
         get_events_info(args.region)
     else:
         parser.print_help()

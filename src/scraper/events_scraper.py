@@ -1,12 +1,12 @@
 import json
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-import time
-from config.settings import BASE_URL, REGIONS
+from config.settings import BASE_URL, REGIONS, CHROMEDRIVER_PATH
+from logger import logger  # Import the logger
 
-
-service = Service(executable_path='chromedriver.exe')
+service = Service(executable_path=CHROMEDRIVER_PATH)
 events_base_url = f"{BASE_URL}events/"
 region_mapping_links = {
     key: f"{events_base_url}{value}"
@@ -18,6 +18,7 @@ class EventScraper:
     def __init__(self, region):
         self.region = region
         self.driver = webdriver.Chrome(service=service)
+        logger.info(f"Initialized EventScraper for region: {region}")
 
     def get_all_events(self):
         elements = self.driver.find_elements(By.CLASS_NAME, 'event-item')
@@ -42,6 +43,7 @@ class EventScraper:
             }
             events.append(event)
 
+        logger.debug(f"Scraped {len(events)} events")
         return events
 
     def get_all_page_links(self):
@@ -53,6 +55,7 @@ class EventScraper:
 
         page_links = [f"{self.region}/?page={i}" for i in range(1, int(last_page_str) + 1)]
 
+        logger.debug(f"Found {len(page_links)} page links")
         return page_links
 
     def get_all_events_main(self):
@@ -72,4 +75,5 @@ class EventScraper:
         with open('events.json', 'w') as json_file:
             json.dump(events, json_file, indent=4)
 
+        logger.info(f"Scraped and saved {len(events)} events to events.json")
         return events

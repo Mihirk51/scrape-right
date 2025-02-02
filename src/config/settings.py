@@ -20,5 +20,5 @@ REGION_MAPPING_LINKS = {
     for key, value in REGIONS.items()
 }
 
-CHROMEDRIVER_PATH = 'chromedriver.exe'
+CHROMEDRIVER_PATH = 'C:/Users/Mihir/Desktop/repos/scrape-right/src/config/chromedriver.exe'
 SLEEP_TIME = 1  # seconds for waiting after page loads
