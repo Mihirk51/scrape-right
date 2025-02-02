@@ -6,6 +6,7 @@ setup(
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=[
+        'click',
         'selenium',
         'webdriver-manager',
         'beautifulsoup4',
@@ -13,7 +14,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'get_events_info=main:main',
+            'get_events_info=main:cli',
         ],
     },
 )

@@ -1,7 +1,7 @@
 import argparse
 from scraper.events_scraper import EventScraper
 from config.settings import REGION_MAPPING_LINKS
-from logger import logger  # Import the logger
+from logger import logger
 
 
 def get_events_info(region_code):
