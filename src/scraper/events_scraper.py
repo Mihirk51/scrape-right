@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from config.settings import BASE_URL, REGIONS, CHROMEDRIVER_PATH, SLEEP_TIME
 from logger import logger
 from .utils import extract_event_details, extract_page_links
+from models import EventSchema
 
 service = Service(executable_path=CHROMEDRIVER_PATH)
 events_base_url = f"{BASE_URL}events/"
@@ -49,5 +50,15 @@ class EventScraper:
         with open('events.json', 'w') as json_file:
             json.dump(events, json_file, indent=4)
 
-        logger.info(f"Scraped and saved {len(events)} events to events.json")
-        return events
+        validated_events = []
+        for event in events:
+            try:
+                validated_event = EventSchema(**event)
+                validated_events.append(validated_event)
+            except Exception as e:
+                logger.error(f"Validation failed for event {event.get('link')}")
+                logger.error(str(e))
+
+        logger.info(f"Scraped, saved, and validated {len(validated_events)} events to events.json")
+
+        return validated_events
