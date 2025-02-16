@@ -94,3 +94,18 @@ def convert_string_to_date(value):
         Date object
     """
     return datetime.strptime(value, "%Y-%m-%d").date() if value else None
+
+
+def decide_upsert_or_ignore(inc_data: dict, db_data: dict, unique_identifier: str):
+    """
+    Upsert an object into the database, ignoring duplicates.
+
+    Args:
+        session: SQLAlchemy session
+        object: Object to upsert
+        pk_name: Name of the primary key column
+
+    Returns:
+        None
+    """
+    pass

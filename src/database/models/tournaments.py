@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from database.operations import (
     convert_string_to_date,
     convert_string_to_decimal,
+    decide_upsert_or_ignore,
     get_all_rows,
     get_db_session,
 )
@@ -26,7 +27,7 @@ class Tournament(Base):
 
 def insert_events(events_list):
     session = get_db_session()
-    get_all_rows(session, Tournament)
+    all_rows = get_all_rows(session, Tournament)
 
     try:
         tournaments = []
@@ -49,8 +50,11 @@ def insert_events(events_list):
                 logo=str(event_dict["logo"]),
             )
             tournaments.append(tournament)
+        decide_upsert_or_ignore(
+            inc_data=tournaments, db_data=all_rows, unique_identifier="name"
+        )
 
-        bulk_upsert(session=session, objects=tournaments, pk_name="tournament_id")
+        # bulk_upsert(session=session, objects=tournaments, pk_name="tournament_id")
     except Exception as e:
         session.rollback()
         raise e
