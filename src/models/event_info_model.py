@@ -3,9 +3,6 @@ _all__ = ("EventSchema",)
 from datetime import datetime
 
 from pydantic import BaseModel, HttpUrl, field_validator, model_validator
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
 
 
 # Pydantic model for validation
@@ -18,6 +15,7 @@ class EventSchema(BaseModel):
     country: str
     link: HttpUrl
     logo: HttpUrl
+    vlr_event_id: int
 
     @field_validator("prize_pool")
     def validate_prize_pool(cls, v):

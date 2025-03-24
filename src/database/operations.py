@@ -1,13 +1,11 @@
 __all__ = ("get_db_session", "get_all_rows")
 
-import os
 from datetime import datetime
 from decimal import Decimal
 
-from dotenv import load_dotenv
-from sqlalchemy import URL, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+
+from src.database.orm import BaseDBManager
 
 Base = declarative_base()
 
@@ -19,21 +17,22 @@ def get_db_session():
     Returns:
         SQLAlchemy session object
     """
-    load_dotenv()
-    url_obj = URL.create(
-        "mssql+pyodbc",
-        username=os.getenv("DB_USERNAME"),
-        password=os.getenv("DB_PASSWORD"),
-        host=os.getenv("DB_HOST"),
-        database=os.getenv("DB_NAME"),
-        query={"driver": "ODBC Driver 17 for SQL Server"},
-    )
+    db_manager = BaseDBManager()
+    return db_manager.get_session()
 
-    engine = create_engine(url_obj)
-    Base.metadata.create_all(engine)
 
-    Session = sessionmaker(bind=engine)
-    return Session()
+def create_tournament_dict(event_dict):
+    """Helper function to create a standardized tournament dictionary"""
+    return {
+        "name": event_dict["name"],
+        "country": event_dict["country"],
+        "prize_pool": convert_string_to_decimal(event_dict["prize_pool"]),
+        "start_date": convert_string_to_date(event_dict["start_date"]),
+        "end_date": convert_string_to_date(event_dict["end_date"]),
+        "link": str(event_dict["link"]),
+        "logo": str(event_dict["logo"]),
+        "vlr_event_id": event_dict["vlr_event_id"],
+    }
 
 
 def get_all_rows(session, model):
@@ -76,11 +75,7 @@ def convert_string_to_decimal(value):
     Returns:
         Decimal object
     """
-    return (
-        Decimal(value.replace("$", "").replace(",", ""))
-        if value != "TBD"
-        else Decimal("0.00")
-    )
+    return Decimal(value.replace("$", "").replace(",", "")) if value != "TBD" else Decimal("0.00")
 
 
 def convert_string_to_date(value):
@@ -98,14 +93,40 @@ def convert_string_to_date(value):
 
 def decide_upsert_or_ignore(inc_data: dict, db_data: dict, unique_identifier: str):
     """
-    Upsert an object into the database, ignoring duplicates.
+    Compare incoming data with database data and decide whether to insert, update, or ignore.
 
     Args:
-        session: SQLAlchemy session
-        object: Object to upsert
-        pk_name: Name of the primary key column
+        inc_data: List of dictionaries containing incoming data
+        db_data: List of dictionaries containing existing database data
+        unique_identifier: Key to match records between inc_data and db_data
 
     Returns:
-        None
+        list: List of tuples containing (item, action, changes) where:
+            - item: The incoming data dictionary
+            - action: 'NEW', 'UPDATE', or 'IGNORE'
+            - changes: Dictionary of field changes {field: (old_value, new_value)} or None
     """
-    pass
+    db_dict = {item[unique_identifier]: item for item in db_data}
+    results = []
+
+    for inc_item in inc_data:
+        db_item = db_dict.get(inc_item[unique_identifier])
+
+        if not db_item:
+            results.append((inc_item, "NEW", None))
+            continue
+
+        # Track specific field changes
+        field_changes = {}
+        for key, new_value in inc_item.items():
+            if key != unique_identifier:
+                old_value = db_item.get(key)
+                if new_value != old_value:
+                    field_changes[key] = (old_value, new_value)
+
+        if field_changes:
+            results.append((inc_item, "UPDATE", field_changes))
+        else:
+            results.append((inc_item, "IGNORE", None))
+
+    return results
